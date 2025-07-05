@@ -1,70 +1,3 @@
-export function renderDefineCriteria(container, dispatch, getState) {
-  const { criteria } = getState();
-
-  container.innerHTML = `
-    <section class="form-step form-step--criteria">
-      <h2 class="form-step__title">🧠 Define your decision criteria</h2>
-      <div class="form-step__group" id="criteria-container">
-        ${criteria
-          .map(
-            (value, index) => `
-            <div class="form-step__field">
-              <label class="form-step__label" for="criterion-${index}">
-                Criterion ${index + 1}
-              </label>
-              <input
-                type="text"
-                id="criterion-${index}"
-                data-index="${index}"
-                value="${value}"
-                class="form-step__input"
-              />
-            </div>
-          `
-          )
-          .join('')}
-      </div>
-
-      <div class="form-step__actions">
-        <button type="button" id="add-criterion" class="form-step__button form-step__button--secondary">
-          + Add Criterion
-        </button>
-        <button type="button" id="next-step" class="form-step__button form-step__button--primary">
-          Next
-        </button>
-      </div>
-    </section>
-  `;
-
-  // Escuchar cambios en los inputs
-  const inputElements = container.querySelectorAll('.form-step__input');
-  inputElements.forEach((input) => {
-    input.addEventListener('input', (e) => {
-      const index = parseInt(e.target.dataset.index, 10);
-      dispatch({
-        type: 'UPDATE_CRITERION',
-        payload: { index, value: e.target.value }
-      });
-    });
-  });
-
-  // Añadir nuevo criterio
-  document.getElementById('add-criterion').addEventListener('click', () => {
-    dispatch({ type: 'ADD_CRITERION' });
-  });
-
-  // Validar y avanzar al siguiente paso
-  document.getElementById('next-step').addEventListener('click', () => {
-    const { criteria } = getState();
-    const hasEmpty = criteria.some((c) => c.trim() === '');
-    if (criteria.length < 2 || hasEmpty) {
-      alert('Please enter at least two non-empty criteria.');
-      return;
-    }
-    dispatch({ type: 'NEXT_STEP' });
-  });
-}
-
 export function renderDefineOptions(container, dispatch, getState) {
   const { options } = getState();
 
@@ -73,21 +6,21 @@ export function renderDefineOptions(container, dispatch, getState) {
       <h2 class="form-step__title">🧭 Define the options you want to compare</h2>
       <div class="form-step__group" id="options-container">
         ${options
-          .map(
-            (value, index) => `
-            <div class="form-step__field">
-              <label class="form-step__label" for="option-${index}">Option ${index + 1}</label>
-              <input
-                type="text"
-                id="option-${index}"
-                data-index="${index}"
-                value="${value}"
-                class="form-step__input"
-              />
-            </div>
-          `
-          )
-          .join('')}
+      .map(
+        (value, index) => `
+              <div class="form-step__field">
+                <label class="form-step__label" for="option-${index}">Option ${index + 1}</label>
+                <input
+                  type="text"
+                  id="option-${index}"
+                  data-index="${index}"
+                  value="${value}"
+                  class="form-step__input"
+                />
+              </div>
+            `
+      )
+      .join('')}
       </div>
 
       <div class="form-step__actions">
@@ -101,31 +34,124 @@ export function renderDefineOptions(container, dispatch, getState) {
     </section>
   `;
 
-  // Manejar cambios en inputs
-  const inputElements = container.querySelectorAll('.form-step__input');
-  inputElements.forEach((input) => {
-    input.addEventListener('input', (e) => {
-      const index = parseInt(e.target.dataset.index, 10);
+  // Añadir nueva opción y mantener valores escritos
+  document.getElementById('add-option').addEventListener('click', () => {
+    // Leer los valores actuales de los inputs
+    const inputElements = container.querySelectorAll('.form-step__input');
+    const currentOptions = Array.from(inputElements).map(input => input.value);
+
+    // Actualizar el estado con los valores actuales
+    currentOptions.forEach((value, index) => {
       dispatch({
         type: 'UPDATE_OPTION',
-        payload: { index, value: e.target.value }
+        payload: { index, value }
       });
     });
-  });
 
-  // Añadir nueva opción
-  document.getElementById('add-option').addEventListener('click', () => {
+    // Agregar una nueva opción vacía
     dispatch({ type: 'ADD_OPTION' });
   });
 
   // Validar y avanzar al siguiente paso
   document.getElementById('next-step').addEventListener('click', () => {
-    const { options } = getState();
-    const hasEmpty = options.some((opt) => opt.trim() === '');
-    if (options.length < 2 || hasEmpty) {
+    // Leer los valores actuales de los inputs
+    const inputElements = container.querySelectorAll('.form-step__input');
+    const newOptions = Array.from(inputElements).map(input => input.value);
+
+    const hasEmpty = newOptions.some((opt) => opt.trim() === '');
+    if (newOptions.length < 2 || hasEmpty) {
       alert('Please enter at least two non-empty options.');
       return;
     }
+
+    // Actualizar el estado con las nuevas opciones
+    newOptions.forEach((value, index) => {
+      dispatch({
+        type: 'UPDATE_OPTION',
+        payload: { index, value }
+      });
+    });
+
+    dispatch({ type: 'NEXT_STEP' });
+  });
+}
+
+export function renderDefineCriteria(container, dispatch, getState) {
+  const { criteria } = getState();
+
+  container.innerHTML = `
+    <section class="form-step form-step--criteria">
+      <h2 class="form-step__title">🧠 Define your decision criteria</h2>
+      <div class="form-step__group" id="criteria-container">
+        ${criteria
+      .map(
+        (value, index) => `
+              <div class="form-step__field">
+                <label class="form-step__label" for="criterion-${index}">
+                  Criterion ${index + 1}
+                </label>
+                <input
+                  type="text"
+                  id="criterion-${index}"
+                  data-index="${index}"
+                  value="${value}"
+                  class="form-step__input"
+                />
+              </div>
+            `
+      )
+      .join('')}
+      </div>
+
+      <div class="form-step__actions">
+        <button type="button" id="add-criterion" class="form-step__button form-step__button--secondary">
+          + Add Criterion
+        </button>
+        <button type="button" id="next-step" class="form-step__button form-step__button--primary">
+          Next
+        </button>
+      </div>
+    </section>
+  `;
+
+  // Añadir nuevo criterio y mantener valores escritos
+  document.getElementById('add-criterion').addEventListener('click', () => {
+    // Leer los valores actuales de los inputs
+    const inputElements = container.querySelectorAll('.form-step__input');
+    const currentCriteria = Array.from(inputElements).map(input => input.value);
+
+    // Actualizar el estado con los valores actuales
+    currentCriteria.forEach((value, index) => {
+      dispatch({
+        type: 'UPDATE_CRITERION',
+        payload: { index, value }
+      });
+    });
+
+    // Agregar un nuevo criterio vacío
+    dispatch({ type: 'ADD_CRITERION' });
+  });
+
+  // Validar y avanzar al siguiente paso
+  document.getElementById('next-step').addEventListener('click', () => {
+    // Leer los valores actuales de los inputs
+    const inputElements = container.querySelectorAll('.form-step__input');
+    const newCriteria = Array.from(inputElements).map(input => input.value);
+
+    const hasEmpty = newCriteria.some((c) => c.trim() === '');
+    if (newCriteria.length < 2 || hasEmpty) {
+      alert('Please enter at least two non-empty criteria.');
+      return;
+    }
+
+    // Actualizar el estado con los nuevos criterios
+    newCriteria.forEach((value, index) => {
+      dispatch({
+        type: 'UPDATE_CRITERION',
+        payload: { index, value }
+      });
+    });
+
     dispatch({ type: 'NEXT_STEP' });
   });
 }
@@ -146,33 +172,33 @@ export function renderRateOptions(container, dispatch, getState) {
           </thead>
           <tbody>
             ${options
-              .map(
-                (option) => `
-                <tr>
-                  <td><strong>${option}</strong></td>
-                  ${criteria
-                    .map((criterion) => {
-                      const value = ratings[option]?.[criterion] ?? '';
-                      return `
-                        <td>
-                          <input
-                            type="number"
-                            min="1"
-                            max="5"
-                            step="1"
-                            value="${value}"
-                            class="form-step__input form-step__input--score"
-                            data-option="${option}"
-                            data-criterion="${criterion}"
-                          />
-                        </td>
-                      `;
-                    })
-                    .join('')}
-                </tr>
-              `
-              )
-              .join('')}
+      .map(
+        (option) => `
+                  <tr>
+                    <td><strong>${option}</strong></td>
+                    ${criteria
+            .map((criterion) => {
+              const value = ratings[option]?.[criterion] ?? '';
+              return `
+                          <td>
+                            <input
+                              type="number"
+                              min="1"
+                              max="5"
+                              step="1"
+                              value="${value}"
+                              class="form-step__input form-step__input--score"
+                              data-option="${option}"
+                              data-criterion="${criterion}"
+                            />
+                          </td>
+                        `;
+            })
+            .join('')}
+                  </tr>
+                `
+      )
+      .join('')}
           </tbody>
         </table>
       </div>
@@ -185,106 +211,34 @@ export function renderRateOptions(container, dispatch, getState) {
     </section>
   `;
 
-  // Añadir listeners a cada input de puntuación
-  const inputs = container.querySelectorAll('.form-step__input--score');
-  inputs.forEach((input) => {
-    input.addEventListener('input', (e) => {
-      const option = e.target.dataset.option;
-      const criterion = e.target.dataset.criterion;
-      const score = parseInt(e.target.value, 10);
-      if (score >= 1 && score <= 5) {
+  // Validar y continuar solo al pulsar "Finish"
+  document.getElementById('next-step').addEventListener('click', () => {
+    // Leer todos los valores de los inputs
+    const inputs = container.querySelectorAll('.form-step__input--score');
+    let valid = true;
+
+    // Guardar los ratings en el estado
+    inputs.forEach((input) => {
+      const option = input.dataset.option;
+      const criterion = input.dataset.criterion;
+      const score = parseInt(input.value, 10);
+      if (isNaN(score) || score < 1 || score > 5) {
+        valid = false;
+      } else {
         dispatch({
           type: 'RATE_OPTION',
           payload: { option, criterion, score }
         });
       }
     });
-  });
 
-  // Validar y continuar
-  document.getElementById('next-step').addEventListener('click', () => {
-    const { options, criteria, ratings } = getState();
-    const allRated = options.every((opt) =>
-      criteria.every((crit) => ratings[opt]?.[crit] >= 1 && ratings[opt]?.[crit] <= 5)
-    );
-
-    if (!allRated) {
-      alert('Please rate every option for every criterion.');
+    if (!valid) {
+      alert('Please rate every option for every criterion (1-5).');
       return;
     }
 
     dispatch({ type: 'NEXT_STEP' });
   });
-}
-
-export function renderSummary(container, _dispatch, getState) {
-  const { options, criteria, weights, ratings } = getState();
-
-  container.innerHTML = `
-    <section class="form-step form-step--summary">
-      <h2 class="form-step__title">📋 Summary of your inputs</h2>
-
-      <div class="form-step__block">
-        <h3 class="form-step__subtitle">Options</h3>
-        <ul class="form-step__list">
-          ${options.map((opt) => `<li class="form-step__list-item">${opt}</li>`).join('')}
-        </ul>
-      </div>
-
-      <div class="form-step__block">
-        <h3 class="form-step__subtitle">Criteria & Weights</h3>
-        <ul class="form-step__list">
-          ${criteria
-            .map(
-              (crit) => `
-              <li class="form-step__list-item">
-                ${crit}: <strong>${weights[crit] ?? 0}</strong>/10
-              </li>
-            `
-            )
-            .join('')}
-        </ul>
-      </div>
-
-      <div class="form-step__block">
-        <h3 class="form-step__subtitle">Ratings</h3>
-        <table class="form-step__table">
-          <thead>
-            <tr>
-              <th>Option \\ Criterion</th>
-              ${criteria.map((c) => `<th>${c}</th>`).join('')}
-            </tr>
-          </thead>
-          <tbody>
-            ${options
-              .map(
-                (opt) => `
-                <tr>
-                  <td><strong>${opt}</strong></td>
-                  ${criteria
-                    .map(
-                      (crit) =>
-                        `<td>${ratings[opt]?.[crit] ?? '-'}</td>`
-                    )
-                    .join('')}
-                </tr>
-              `
-              )
-              .join('')}
-          </tbody>
-        </table>
-      </div>
-
-      <div class="form-step__actions">
-        <a href="./charts.html" class="form-step__button form-step__button--primary">
-          View Charts
-        </a>
-      </div>
-    </section>
-  `;
-
-  // (Opcional) Guardar en localStorage aquí si quieres persistir
-  localStorage.setItem('choice-map-data', JSON.stringify(getState()));
 }
 
 export function renderWeightCriteria(container, dispatch, getState) {
@@ -326,32 +280,107 @@ export function renderWeightCriteria(container, dispatch, getState) {
     </section>
   `;
 
-  // Manejar cambios en los sliders
+  // Actualizar el valor visual del slider al moverlo (sin actualizar el estado global)
   const sliders = container.querySelectorAll('.form-step__input--range');
   sliders.forEach((slider, index) => {
     slider.addEventListener('input', (e) => {
-      const criterion = e.target.dataset.criterion;
-      const weight = parseInt(e.target.value, 10);
-      document.getElementById(`value-${index}`).textContent = weight;
-      dispatch({
-        type: 'SET_WEIGHT',
-        payload: { criterion, weight }
-      });
+      document.getElementById(`value-${index}`).textContent = e.target.value;
     });
   });
 
-  // Validar y pasar al siguiente paso
+  // Validar y pasar al siguiente paso solo al pulsar "Next"
   document.getElementById('next-step').addEventListener('click', () => {
-    const state = getState();
-    const allAssigned = state.criteria.every(
-      (c) => typeof state.weights[c] === 'number' && state.weights[c] >= 0
-    );
+    const sliders = container.querySelectorAll('.form-step__input--range');
+    let allAssigned = true;
+
+    sliders.forEach((slider) => {
+      const criterion = slider.dataset.criterion;
+      const weight = parseInt(slider.value, 10);
+      if (isNaN(weight) || weight < 0 || weight > 10) {
+        allAssigned = false;
+      } else {
+        dispatch({
+          type: 'SET_WEIGHT',
+          payload: { criterion, weight }
+        });
+      }
+    });
 
     if (!allAssigned) {
-      alert('Please assign a weight to every criterion.');
+      alert('Please assign a weight (0-10) to every criterion.');
       return;
     }
 
     dispatch({ type: 'NEXT_STEP' });
   });
+}
+
+export function renderSummary(container, _dispatch, getState) {
+  const { options, criteria, weights, ratings } = getState();
+
+  container.innerHTML = `
+    <section class="form-step form-step--summary">
+      <h2 class="form-step__title">📋 Summary of your inputs</h2>
+
+      <div class="form-step__block">
+        <h3 class="form-step__subtitle">Options</h3>
+        <ul class="form-step__list">
+          ${options.map((opt) => `<li class="form-step__list-item">${opt}</li>`).join('')}
+        </ul>
+      </div>
+
+      <div class="form-step__block">
+        <h3 class="form-step__subtitle">Criteria & Weights</h3>
+        <ul class="form-step__list">
+          ${criteria
+            .map(
+              (crit) => `
+                <li class="form-step__list-item">
+                  ${crit}: <strong>${weights[crit] ?? 0}</strong>/10
+                </li>
+              `
+            )
+            .join('')}
+        </ul>
+      </div>
+
+      <div class="form-step__block">
+        <h3 class="form-step__subtitle">Ratings</h3>
+        <table class="form-step__table">
+          <thead>
+            <tr>
+              <th>Option \\ Criterion</th>
+              ${criteria.map((c) => `<th>${c}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${options
+              .map(
+                (opt) => `
+                  <tr>
+                    <td><strong>${opt}</strong></td>
+                    ${criteria
+                      .map(
+                        (crit) =>
+                          `<td>${ratings[opt]?.[crit] ?? '-'}</td>`
+                      )
+                      .join('')}
+                  </tr>
+                `
+              )
+              .join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="form-step__actions">
+        <a href="./charts.html" class="form-step__button form-step__button--primary">
+          View Charts
+        </a>
+      </div>
+    </section>
+  `;
+
+  // (Opcional) Guardar en localStorage aquí si quieres persistir
+  localStorage.setItem('choice-map-data', JSON.stringify(getState()));
 }
