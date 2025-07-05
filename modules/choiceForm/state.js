@@ -16,6 +16,8 @@ const initialState = {
 
 export function reducer(state, action) {
   switch (action.type) {
+    case 'INIT':
+      return initialState;
     case 'NEXT_STEP':
       return { ...state, currentStep: state.currentStep + 1 };
 
