@@ -1,0 +1,24 @@
+:root {
+  --color-primary: #ff8052;
+  --color-bg: #fffaf6;
+  --color-text: #333;
+  --color-muted: #777;
+  --color-border: #e0e0e0;
+  --radius: 8px;
+  --transition: 0.2s ease;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  background-color: var(--color-bg);
+  font-family: "Inter", sans-serif;
+  color: var(--color-text);
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
