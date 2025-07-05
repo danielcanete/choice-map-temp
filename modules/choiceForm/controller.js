@@ -37,7 +37,6 @@ export const createFormController = () => {
     const renderer = rendererMap[step];
 
     if (typeof renderer === 'function') {
-      // 🔧 Aquí corregimos: pasamos dispatch y getState como argumentos
       renderer(container, dispatch, getState);
     } else {
       container.innerHTML = `<p class="form-step__error">Invalid step: ${step}</p>`;
