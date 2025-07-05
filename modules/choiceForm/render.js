@@ -5,24 +5,8 @@ export function renderDefineOptions(container, dispatch, getState) {
     <section class="form-step form-step--options">
       <h2 class="form-step__title">🧭 Define the options you want to compare</h2>
       <div class="form-step__group" id="options-container">
-        ${options
-      .map(
-        (value, index) => `
-              <div class="form-step__field">
-                <label class="form-step__label" for="option-${index}">Option ${index + 1}</label>
-                <input
-                  type="text"
-                  id="option-${index}"
-                  data-index="${index}"
-                  value="${value}"
-                  class="form-step__input"
-                />
-              </div>
-            `
-      )
-      .join('')}
+        ${renderFields('option', options, 'Option')}
       </div>
-
       <div class="form-step__actions">
         <button type="button" id="add-option" class="form-step__button form-step__button--secondary">
           + Add Option
@@ -34,46 +18,68 @@ export function renderDefineOptions(container, dispatch, getState) {
     </section>
   `;
 
-  // Añadir nueva opción y mantener valores escritos
-  document.getElementById('add-option').addEventListener('click', () => {
-    // Leer los valores actuales de los inputs
-    const inputElements = container.querySelectorAll('.form-step__input');
-    const currentOptions = Array.from(inputElements).map(input => input.value);
+  attachOptionEvents(container, dispatch);
+}
 
-    // Actualizar el estado con los valores actuales
-    currentOptions.forEach((value, index) => {
+function attachOptionEvents(container, dispatch) {
+  container.querySelector('#add-option').addEventListener('click', () => {
+    const inputElements = container.querySelectorAll('.form-step__input');
+    inputElements.forEach((input, index) => {
       dispatch({
         type: 'UPDATE_OPTION',
-        payload: { index, value }
+        payload: { index, value: input.value }
       });
     });
-
-    // Agregar una nueva opción vacía
     dispatch({ type: 'ADD_OPTION' });
   });
 
-  // Validar y avanzar al siguiente paso
-  document.getElementById('next-step').addEventListener('click', () => {
-    // Leer los valores actuales de los inputs
+  container.querySelector('#next-step').addEventListener('click', () => {
     const inputElements = container.querySelectorAll('.form-step__input');
     const newOptions = Array.from(inputElements).map(input => input.value);
-
-    const hasEmpty = newOptions.some((opt) => opt.trim() === '');
-    if (newOptions.length < 2 || hasEmpty) {
+    if (newOptions.length < 2 || newOptions.some(opt => opt.trim() === '')) {
       alert('Please enter at least two non-empty options.');
       return;
     }
-
-    // Actualizar el estado con las nuevas opciones
     newOptions.forEach((value, index) => {
       dispatch({
         type: 'UPDATE_OPTION',
         payload: { index, value }
       });
     });
-
     dispatch({ type: 'NEXT_STEP' });
   });
+}
+
+function createInputField({ id, label, value, className = '', type = 'text', data = {} }) {
+  const dataAttrs = Object.entries(data)
+    .map(([k, v]) => `data-${k}="${v}"`)
+    .join(' ');
+  return `
+    <div class="form-step__field">
+      <label class="form-step__label" for="${id}">${label}</label>
+      <input
+        type="${type}"
+        id="${id}"
+        value="${value}"
+        class="form-step__input${className ? ' ' + className : ''}"
+        ${dataAttrs}
+      />
+    </div>
+  `;
+}
+
+function renderFields(containerId, items, labelPrefix, inputType = 'text') {
+  return items
+    .map((value, index) =>
+      createInputField({
+        id: `${containerId}-${index}`,
+        label: `${labelPrefix} ${index + 1}`,
+        value,
+        type: inputType,
+        data: { index }
+      })
+    )
+    .join('');
 }
 
 export function renderDefineCriteria(container, dispatch, getState) {
@@ -83,26 +89,8 @@ export function renderDefineCriteria(container, dispatch, getState) {
     <section class="form-step form-step--criteria">
       <h2 class="form-step__title">🧠 Define your decision criteria</h2>
       <div class="form-step__group" id="criteria-container">
-        ${criteria
-      .map(
-        (value, index) => `
-              <div class="form-step__field">
-                <label class="form-step__label" for="criterion-${index}">
-                  Criterion ${index + 1}
-                </label>
-                <input
-                  type="text"
-                  id="criterion-${index}"
-                  data-index="${index}"
-                  value="${value}"
-                  class="form-step__input"
-                />
-              </div>
-            `
-      )
-      .join('')}
+        ${renderFields('criterion', criteria, 'Criterion')}
       </div>
-
       <div class="form-step__actions">
         <button type="button" id="add-criterion" class="form-step__button form-step__button--secondary">
           + Add Criterion
@@ -114,44 +102,34 @@ export function renderDefineCriteria(container, dispatch, getState) {
     </section>
   `;
 
-  // Añadir nuevo criterio y mantener valores escritos
-  document.getElementById('add-criterion').addEventListener('click', () => {
-    // Leer los valores actuales de los inputs
-    const inputElements = container.querySelectorAll('.form-step__input');
-    const currentCriteria = Array.from(inputElements).map(input => input.value);
+  attachCriteriaEvents(container, dispatch);
+}
 
-    // Actualizar el estado con los valores actuales
-    currentCriteria.forEach((value, index) => {
+function attachCriteriaEvents(container, dispatch) {
+  container.querySelector('#add-criterion').addEventListener('click', () => {
+    const inputElements = container.querySelectorAll('.form-step__input');
+    inputElements.forEach((input, index) => {
       dispatch({
         type: 'UPDATE_CRITERION',
-        payload: { index, value }
+        payload: { index, value: input.value }
       });
     });
-
-    // Agregar un nuevo criterio vacío
     dispatch({ type: 'ADD_CRITERION' });
   });
 
-  // Validar y avanzar al siguiente paso
-  document.getElementById('next-step').addEventListener('click', () => {
-    // Leer los valores actuales de los inputs
+  container.querySelector('#next-step').addEventListener('click', () => {
     const inputElements = container.querySelectorAll('.form-step__input');
     const newCriteria = Array.from(inputElements).map(input => input.value);
-
-    const hasEmpty = newCriteria.some((c) => c.trim() === '');
-    if (newCriteria.length < 2 || hasEmpty) {
+    if (newCriteria.length < 2 || newCriteria.some(c => c.trim() === '')) {
       alert('Please enter at least two non-empty criteria.');
       return;
     }
-
-    // Actualizar el estado con los nuevos criterios
     newCriteria.forEach((value, index) => {
       dispatch({
         type: 'UPDATE_CRITERION',
         payload: { index, value }
       });
     });
-
     dispatch({ type: 'NEXT_STEP' });
   });
 }
