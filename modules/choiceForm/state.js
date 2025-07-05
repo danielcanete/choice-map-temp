@@ -4,10 +4,10 @@
 
 const initialState = {
   currentStep: 0,
-  options: ['Option 1', 'Option 2'],
-  criteria: ['Criterion 1', 'Criterion 2'],
-  weights: {},         // { criterionName: weight }
-  ratings: {}          // { optionName: { criterionName: score } }
+  options: ['', ''],
+  criteria: ['', ''],
+  weights: {}, // { criterionName: weight }
+  ratings: {}, // { optionName: { criterionName: score } }
 };
 
 // ==============================
