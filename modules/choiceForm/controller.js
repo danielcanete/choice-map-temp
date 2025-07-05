@@ -1,55 +1,44 @@
-import {
-  renderDefineCriteria,
-  renderDefineOptions,
-  renderRateOptions,
-  renderSummary,
-  renderWeightCriteria
-} from './render.js';
+import * as renderers from './render.js';
 import { reducer } from './state.js';
 import { steps } from './steps.js';
+
+const RENDERER_MAP = {
+  'define-options': renderers.renderDefineOptions,
+  'define-criteria': renderers.renderDefineCriteria,
+  'weight-criteria': renderers.renderWeightCriteria,
+  'rate-options': renderers.renderRateOptions,
+  'summary': renderers.renderSummary
+};
 
 export const createFormController = () => {
   let state = reducer(undefined, { type: 'INIT' });
 
-  function getState() {
-    return state;
-  }
+  const getState = () => state;
 
-  function dispatch(action) {
+  const dispatch = (action) => {
     state = reducer(state, action);
     renderCurrentStep();
-  }
+  };
 
-  function renderCurrentStep() {
+  const renderCurrentStep = () => {
     const container = document.getElementById('choice-form');
     if (!container) return;
 
-    const step = steps[state.currentStep]?.id;
+    const stepId = steps[state.currentStep]?.id;
+    const renderer = RENDERER_MAP[stepId];
 
-    const rendererMap = {
-      'define-options': renderDefineOptions,
-      'define-criteria': renderDefineCriteria,
-      'weight-criteria': renderWeightCriteria,
-      'rate-options': renderRateOptions,
-      'summary': renderSummary
-    };
-
-    const renderer = rendererMap[step];
-
-    if (typeof renderer === 'function') {
+    if (renderer) {
       renderer(container, dispatch, getState);
     } else {
-      container.innerHTML = `<p class="form-step__error">Invalid step: ${step}</p>`;
+      container.innerHTML = `<p class="form-step__error">Invalid step: ${stepId}</p>`;
     }
-  }
+  };
 
-  function init() {
-    renderCurrentStep();
-  }
+  const init = () => renderCurrentStep();
 
-  return {
+  return Object.freeze({
     init,
     dispatch,
     getState
-  };
+  });
 };
